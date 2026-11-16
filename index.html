@@ -1,0 +1,391 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Rosyphone</title>
+<link rel="manifest" href="./manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--brightness:1;--glass:rgba(255,255,255,.66)}
+body{
+ font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ background:#f8f6fa;color:#333;overflow:hidden;
+ user-select:none
+}
+#phone{
+ width:100%;height:100dvh;position:relative;overflow:hidden;
+ background:linear-gradient(145deg,#fff,#f8f4fb);
+ filter:brightness(var(--brightness))
+}
+.screen{position:absolute;inset:0;display:none}
+.screen.active{display:flex}
+#boot{
+ align-items:center;justify-content:center;flex-direction:column;
+ background:linear-gradient(145deg,#fff,#f8f0fa)
+}
+.wing{font-size:75px;animation:float 2s infinite ease-in-out}
+.bootname{font-size:29px;letter-spacing:5px;margin-top:20px;color:#b99abf}
+.loading{margin-top:25px;color:#b9a3bd;font-size:12px;letter-spacing:3px}
+@keyframes float{50%{transform:translateY(-13px) rotate(4deg)}}
+#lock{
+ flex-direction:column;align-items:center;
+ padding:75px 25px 35px;
+ background:linear-gradient(160deg,#fff,#f1e9f5);
+ text-align:center
+}
+.clock{font-size:76px;font-weight:200;letter-spacing:-4px}
+.date{font-size:15px;color:#8e8294;margin-top:5px}
+.lockbox{margin-top:auto;margin-bottom:auto;width:100%;max-width:300px}
+.lockbox h3{font-weight:400;margin-bottom:18px}
+#password{
+ width:100%;padding:16px;border:1px solid #e8ddea;
+ border-radius:18px;background:#ffffffaa;text-align:center;
+ font-size:22px;letter-spacing:9px;outline:none
+}
+#unlock{
+ margin-top:12px;padding:14px;width:100%;border:0;
+ border-radius:18px;background:#c9aecf;color:white;font-size:15px
+}
+.hint{font-size:12px;color:#a494aa;margin-top:14px}
+#error{font-size:12px;color:#c16c8b;margin-top:8px}
+#home{
+ flex-direction:column;padding:55px 22px 24px;
+ background:linear-gradient(160deg,#fff 35%,#faf5fc)
+}
+.status{
+ position:absolute;top:14px;left:25px;right:25px;
+ display:flex;justify-content:space-between;font-size:12px;
+ color:#655a69;z-index:5
+}
+.greeting{margin-top:30px;font-size:13px;color:#a18ca8}
+.home-title{font-size:30px;font-weight:300;margin-top:5px}
+.home-sub{font-size:12px;color:#aa9eae;margin-top:5px}
+.apps{
+ display:grid;grid-template-columns:repeat(2,1fr);
+ gap:25px;margin-top:48px
+}
+.appicon{border:0;background:transparent;text-align:center;color:#514957}
+.icon{
+ width:66px;height:66px;border-radius:22px;
+ display:flex;align-items:center;justify-content:center;
+ font-size:30px;margin:auto auto 9px;
+ background:linear-gradient(145deg,#fff,#f1e7f4);
+ box-shadow:0 7px 20px #d8c9dc55;
+ border:1px solid #fff
+}
+.appicon small{font-size:12px}
+.dock{
+ margin-top:auto;padding:13px;border-radius:27px;
+ background:#ffffffa8;backdrop-filter:blur(25px);
+ display:flex;justify-content:space-around;
+ border:1px solid #fff;box-shadow:0 8px 30px #d5c7da33
+}
+.dock button{border:0;background:none;font-size:25px}
+#appscreen{
+ background:#f8f5fa;flex-direction:column;
+}
+.appbar{
+ height:60px;display:flex;align-items:center;
+ justify-content:space-between;padding:0 20px;
+ background:#ffffffbd;backdrop-filter:blur(20px);
+ border-bottom:1px solid #eee
+}
+.appbar button{border:0;background:none;color:#987da1;font-size:15px}
+#appcontent{flex:1;overflow:auto;padding:20px;user-select:text}
+.panel{
+ background:#fff;border-radius:22px;padding:20px;
+ box-shadow:0 5px 22px #d9c9df22;margin-bottom:15px
+}
+.panel h2{font-weight:400;margin-bottom:10px}
+.panel p{font-size:13px;color:#938698;line-height:1.6}
+.action{
+ padding:12px 17px;border:0;border-radius:14px;
+ background:#d8c1df;color:#fff;margin-top:12px
+}
+input,textarea{
+ max-width:100%;padding:13px;border:1px solid #eadfeb;
+ border-radius:13px;background:#fff;font:inherit
+}
+.browserbar{display:flex;gap:7px;margin-bottom:14px}
+.browserbar input{flex:1;min-width:0}
+.browserbar button{border:0;background:#d8c1df;color:white;border-radius:12px;padding:10px}
+.browserframe{width:100%;height:65vh;border:0;border-radius:17px;background:white}
+.calc{
+ display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:15px
+}
+.calc button{
+ padding:18px 5px;border:0;border-radius:16px;
+ background:#f1e8f4;font-size:19px;color:#66546b
+}
+#calcdisplay{
+ width:100%;padding:20px;text-align:right;font-size:30px;
+ background:white;border:0;border-radius:17px
+}
+#control{
+ position:absolute;z-index:20;top:0;left:0;right:0;
+ padding:25px 20px 30px;
+ background:rgba(247,241,250,.91);
+ backdrop-filter:blur(35px);border-radius:0 0 30px 30px;
+ transform:translateY(-110%);transition:.3s;
+ border:1px solid #fff
+}
+#control.open{transform:translateY(0)}
+.ccgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ccbox{
+ background:#ffffffc9;padding:17px;border-radius:20px;
+ font-size:13px
+}
+.ccbox input{width:100%;padding:0;margin-top:12px;accent-color:#bd9ac7}
+.ccclose{width:100%;border:0;background:#ddcce2;padding:13px;border-radius:15px;margin-top:16px}
+#nav{
+ position:absolute;z-index:15;bottom:0;left:0;right:0;
+ height:35px;display:flex;align-items:center;
+ justify-content:center;gap:65px;
+ background:#ffffffa8;backdrop-filter:blur(15px)
+}
+#nav button{border:0;background:none;color:#8e7996;font-size:19px}
+#windowpanel{
+ position:absolute;inset:0;z-index:18;
+ display:none;align-items:center;justify-content:center;
+ background:#e9deedaa;backdrop-filter:blur(18px);padding:25px
+}
+#windowpanel.show{display:flex}
+.windowcard{background:white;border-radius:25px;padding:25px;width:100%}
+#windowpanel button{padding:12px;border:0;border-radius:13px;background:#eee3f1;margin:5px}
+@media(min-width:600px){
+ #phone{max-width:420px;height:850px;max-height:95dvh;margin:auto;border-radius:40px;border:7px solid #222}
+ body{display:flex;align-items:center;justify-content:center;background:#e9e5eb}
+}
+</style>
+</head>
+<body>
+<div id="phone">
+
+ <section id="boot" class="screen active">
+  <div class="wing">🪽</div>
+  <div class="bootname">ROSYPHONE</div>
+  <div class="loading">LOADING YOUR WORLD...</div>
+ </section>
+
+ <section id="lock" class="screen">
+  <div class="status"><span>● Rosy Network</span><span id="lockbattery">100% ▰</span></div>
+  <div class="clock" id="lockclock">00:00</div>
+  <div class="date" id="lockdate">Monday</div>
+  <div class="lockbox">
+   <div style="font-size:35px;margin-bottom:12px">🪽</div>
+   <h3>Welcome back</h3>
+   <input id="password" type="password" maxlength="4" inputmode="numeric" placeholder="••••">
+   <button id="unlock">Unlock ♡</button>
+   <div class="hint">Password hint: 1234</div>
+   <div id="error"></div>
+  </div>
+  <div style="font-size:12px;color:#b6a5bb">Rosyphone • Personal Edition</div>
+ </section>
+
+ <section id="home" class="screen">
+  <div class="status"><span>● Rosy Network</span><span id="battery">100% ▰</span></div>
+  <div class="greeting">WELCOME TO YOUR WORLD</div>
+  <div class="home-title">Rosyphone ♡</div>
+  <div class="home-sub" id="hometime">Your little angelic space</div>
+
+  <div class="apps">
+   <button class="appicon" data-app="rosy">
+    <div class="icon">🪽</div><small>Rosylicious</small>
+   </button>
+   <button class="appicon" data-app="telegram">
+    <div class="icon">💌</div><small>Telegram</small>
+   </button>
+   <button class="appicon" data-app="calculator">
+    <div class="icon">🧮</div><small>RosyCalculator</small>
+   </button>
+   <button class="appicon" data-app="credit">
+    <div class="icon">🤍</div><small>Credit</small>
+   </button>
+  </div>
+
+  <div class="dock">
+   <button data-app="google">🔎</button>
+   <button data-app="safari">🧭</button>
+   <button data-app="chatgpt">🤖</button>
+  </div>
+ </section>
+
+ <section id="appscreen" class="screen">
+  <div class="appbar">
+   <button id="back">‹ Back</button>
+   <span id="apptitle">App</span>
+   <button id="closeapp">✕</button>
+  </div>
+  <div id="appcontent"></div>
+ </section>
+
+ <div id="control">
+  <div style="display:flex;justify-content:space-between;margin-bottom:18px">
+   <b>Control Center</b><span id="cctime">00:00</span>
+  </div>
+  <div class="ccgrid">
+   <div class="ccbox">📶 Wi-Fi<br><small>Connected</small></div>
+   <div class="ccbox">🔋 Battery<br><small>100% simulated</small></div>
+   <div class="ccbox">☀️ Brightness
+    <input id="bright" type="range" min="30" max="120" value="100">
+   </div>
+   <div class="ccbox">🔊 Sound
+    <input id="volume" type="range" min="0" max="100" value="60">
+   </div>
+  </div>
+  <button class="ccclose" id="ccclose">Close</button>
+ </div>
+
+ <div id="windowpanel">
+  <div class="windowcard">
+   <h2 style="font-weight:400;margin-bottom:15px">Windows</h2>
+   <p style="color:#98889c;font-size:13px">Recent applications</p>
+   <div id="recentapps" style="margin:15px 0"></div>
+   <button id="windowhome">Home</button>
+   <button id="windowclose">Close all</button>
+  </div>
+ </div>
+
+ <div id="nav">
+  <button id="navback">‹</button>
+  <button id="navhome">○</button>
+  <button id="navwindow">▢</button>
+ </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const screens=["boot","lock","home","appscreen"];
+let currentApp="",recent=[],volume=60;
+
+function showScreen(name){
+ screens.forEach(s=>$(s).classList.toggle("active",s===name));
+}
+function updateClock(){
+ const d=new Date();
+ $("lockclock").textContent=d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit",hour12:false});
+ $("lockdate").textContent=d.toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+ $("hometime").textContent=d.toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"})+" • "+d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+ $("cctime").textContent=d.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+}
+setInterval(updateClock,1000);updateClock();
+
+setTimeout(()=>showScreen("lock"),2200);
+
+$("unlock").onclick=()=>{
+ if($("password").value==="1234"){
+  $("error").textContent="";
+  $("password").value="";
+  showScreen("home");
+ }else{
+  $("error").textContent="Incorrect password. Try again.";
+ }
+};
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("unlock").click()});
+
+const templates={
+ rosy:`<div class="panel" style="text-align:center">
+ <div style="font-size:55px">🪽</div><h2>Rosylicious</h2>
+ <p>Welcome to your angelic world.</p>
+ <button class="action" onclick="window.open('https://t.me/rosyliciousstore','_blank')">Visit Telegram Store</button>
+ </div>`,
+ telegram:`<div class="panel"><h2>Telegram 💌</h2><p>Open your Telegram store or Telegram app.</p>
+ <button class="action" onclick="window.open('https://t.me/rosyliciousstore','_blank')">Open Telegram</button></div>`,
+ credit:`<div class="panel" style="text-align:center"><div style="font-size:45px">🤍</div>
+ <h2>Rosyphone Credits</h2><p>Made with love.</p>
+ <p>Maker: SYAIEZz</p><p>Owner: @wrraedeiia</p>
+ <p>Rosyphone Personal Edition</p></div>`,
+ calculator:`<div class="panel"><h2>RosyCalculator</h2>
+ <p>Robux calculator • RM1 = 20 Robux</p>
+ <input id="calcdisplay" value="0" readonly>
+ <div class="calc">
+ ${["7","8","9","C","4","5","6","⌫","1","2","3","00","0",".","=","RM"].map(x=>`<button onclick="calc('${x}')">${x}</button>`).join("")}
+ </div><p id="calcresult" style="margin-top:15px">Enter an amount.</p></div>`,
+ google:`<div class="panel"><h2>Google Search</h2>
+ <div class="browserbar"><input id="googleq" placeholder="Search Google..."><button onclick="googleSearch()">Go</button></div>
+ <p>Search the internet using Google.</p></div>`,
+ safari:`<div class="panel"><h2>Safari</h2>
+ <div class="browserbar"><input id="safariurl" placeholder="Enter website address"><button onclick="safariGo()">Go</button></div>
+ <p>Safari uses your device browser to open websites. Some websites block embedded viewing.</p>
+ <button class="action" onclick="window.open('https://www.google.com','_blank')">Open Google</button>
+ </div>`,
+ chatgpt:`<div class="panel" style="text-align:center">
+ <div style="font-size:45px">🤖</div><h2>Rosy AI</h2>
+ <p>Your custom ChatGPT shortcut.</p>
+ <button class="action" onclick="window.open('https://chatgpt.com','_blank')">Open ChatGPT</button>
+ </div>`
+};
+
+function openApp(app){
+ currentApp=app;
+ const names={rosy:"Rosylicious",telegram:"Telegram",calculator:"RosyCalculator",credit:"Credit",google:"Google",safari:"Safari",chatgpt:"Rosy AI"};
+ $("apptitle").textContent=names[app]||app;
+ $("appcontent").innerHTML=templates[app]||"<div class='panel'>App unavailable.</div>";
+ recent=[app,...recent.filter(x=>x!==app)].slice(0,5);
+ $("recentapps").innerHTML=recent.map(x=>`<button onclick="openApp('${x}')">${names[x]}</button>`).join("");
+ showScreen("appscreen");
+}
+document.querySelectorAll("[data-app]").forEach(b=>b.onclick=()=>openApp(b.dataset.app));
+
+function goHome(){showScreen("home");$("windowpanel").classList.remove("show");}
+function goBack(){if($("control").classList.contains("open")){$("control").classList.remove("open");return}goHome()}
+$("back").onclick=goBack;
+$("closeapp").onclick=goHome;
+$("navback").onclick=goBack;
+$("navhome").onclick=goHome;
+$("navwindow").onclick=()=>$("windowpanel").classList.toggle("show");
+$("windowhome").onclick=goHome;
+$("windowclose").onclick=()=>{recent=[];$("recentapps").innerHTML="";$("windowpanel").classList.remove("show");goHome()};
+
+function calc(value){
+ const display=$("calcdisplay");
+ if(value==="C"){display.value="0";$("calcresult").textContent="Enter an amount.";return}
+ if(value==="⌫"){display.value=display.value.slice(0,-1)||"0";return}
+ if(value==="RM"){
+  const amount=Number(display.value);
+  $("calcresult").textContent="RM"+amount.toFixed(2)+" = "+Math.floor(amount*20).toLocaleString()+" Robux";
+  return;
+ }
+ if(value==="="){return}
+ display.value=display.value==="0"?value:display.value+value;
+}
+function googleSearch(){
+ const q=$("googleq").value.trim();
+ if(q)window.open("https://www.google.com/search?q="+encodeURIComponent(q),"_blank");
+}
+function safariGo(){
+ let url=$("safariurl").value.trim();
+ if(!url)return;
+ if(!/^https?:\/\//i.test(url))url="https://"+url;
+ window.open(url,"_blank");
+}
+
+$("bright").oninput=e=>document.documentElement.style.setProperty("--brightness",e.target.value/100);
+$("volume").oninput=e=>volume=Number(e.target.value);
+$("ccclose").onclick=()=>$("control").classList.remove("open");
+
+let startY=0,startX=0;
+$("phone").addEventListener("touchstart",e=>{
+ startY=e.touches[0].clientY;startX=e.touches[0].clientX;
+},{passive:true});
+$("phone").addEventListener("touchend",e=>{
+ const endY=e.changedTouches[0].clientY;
+ const diff=endY-startY;
+ if(startY<45&&diff>65)$("control").classList.add("open");
+ if($("control").classList.contains("open")&&diff < -60)$("control").classList.remove("open");
+},{passive:true});
+
+if("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+  navigator.serviceWorker.register("./service-worker.js").catch(console.error);
+ });
+}
+</script>
+</body>
+    </html>
+  
